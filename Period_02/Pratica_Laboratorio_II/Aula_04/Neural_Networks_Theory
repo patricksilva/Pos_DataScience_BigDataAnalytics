@@ -1,0 +1,84 @@
+def step_function(x):
+    return 1 if x >= 0 else 0
+def perceptron_output(weights, bias, x):
+    """returns 1 if the perceptron 'fires', 0 if not"""
+    calculation = dot(weights, x) + bias
+    return step_function(calculation)
+'''
+#The perceptron is simply distinguishing between the half spaces separated by the
+#hyperplane of points x for which:
+'''
+dot(weights,x) + bias == 0
+
+'''
+With properly chosen weights, perceptrons can solve a number of simple problems
+(Figure 18-1). For example, we can create an AND gate (which returns 1 if both its inputs
+are 1 but returns 0 if one of its inputs is 0) with:
+'''
+weights = [2, 2]
+bias = -3
+
+'''
+If both inputs are 1, the calculation equals 2 + 2 - 3 = 1, and the output is 1. If only one
+of the inputs is 1, the calculation equals 2 + 0 - 3 = -1, and the output is 0. And if both of
+the inputs are 0, the calculation equals -3, and the output is 0.
+Similarly, we could build an OR gate with:
+'''
+weights = [2, 2]
+bias = -1
+
+'''And we could build a NOT gate (which has one input and converts 1 to 0 and 0 to 1) with:'''
+weights = [-2]
+bias = 1
+
+'''
+However, there are some problems that simply can’t be solved by a single perceptron. For
+example, no matter how hard you try, you cannot use a perceptron to build an XOR gate
+that outputs 1 if exactly one of its inputs is 1 and 0 otherwise. This is where we start
+needing more-complicated neural networks.
+'''
+
+'''Of course, you don’t need to approximate a neuron in order to build a logic gate:'''
+and_gate = min
+or_gate = max
+xor_gate = lambda x, y: 0 if x == y else 1
+
+'''Like real neurons, artificial neurons start getting more interesting when you start
+connecting them together.'''
+
+def sigmoid(t):
+    return 1 / (1 + math.exp(-t))
+
+'''You may remember sigmoid from Chapter 16, where it was called logistic. Technically “sigmoid” refers
+to the shape of the function, “logistic” to this particular function although people often use the terms
+interchangeably.'''
+def neuron_output(weights, inputs):
+    return sigmoid(dot(weights, inputs))
+
+'''
+Given this function, we can represent a neuron simply as a list of weights whose length is
+one more than the number of inputs to that neuron (because of the bias weight). Then we
+can represent a neural network as a list of (noninput) layers, where each layer is just a list
+of the neurons in that layer.
+
+That is, we’ll represent a neural network as a list (layers) of lists (neurons) of lists
+(weights).
+
+Given such a representation, using the neural network is quite simple:
+'''
+
+def feed_forward(neural_network, input_vector):
+    """
+    takes in a neural network (represented as a list of lists of lists of weights)
+    and returns the output from forward-propagating the input
+    """
+    outputs = []
+    # process one layer at a time
+    for layer in neural_network:
+        input_with_bias = input_vector + [1] # add a bias input
+        output = [neuron_output(neuron, input_with_bias) # compute the output
+                    for neuron in layer] # for each neuron
+        outputs.append(output) # and remember it
+        # then the input to the next layer is the output of this one
+        input_vector = output
+    return outputs
